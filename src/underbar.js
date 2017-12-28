@@ -221,12 +221,30 @@ _.uniq = function(array, isSorted, iterator) {
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    iterator = iterator || _.identity;
+
+    return _.reduce(collection, function(truth, item) {
+      if (!iterator(item)) {
+        return false;
+      }
+
+      return truth;
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity;
+
+    return _.reduce(collection, function(truth, item) {
+      if (iterator(item)) {
+        return true;
+      }
+
+      return truth;
+    }, false);
   };
 
 
@@ -249,11 +267,27 @@ _.uniq = function(array, isSorted, iterator) {
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    _.each(Array.prototype.slice.call(arguments, 1), function(source) {
+      for (var prop in source) {
+        obj[prop] = source[prop];
+      }
+    });
+
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    _.each(Array.prototype.slice.call(arguments, 1), function(source) {
+      for (var prop in source) {
+        if (obj[prop] === undefined) {
+          obj[prop] = source[prop];
+        }
+      }
+    });
+
+    return obj;
   };
 
 
@@ -297,6 +331,17 @@ _.uniq = function(array, isSorted, iterator) {
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var result = {};
+
+    return function() {
+      var key = JSON.stringify(arguments);
+
+      if(!(key in result)) {
+        result[key] = func.apply(this, arguments);
+      }
+
+      return result[key];
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -306,6 +351,7 @@ _.uniq = function(array, isSorted, iterator) {
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    return setTimeout.apply(this, arguments);
   };
 
 
@@ -320,6 +366,17 @@ _.uniq = function(array, isSorted, iterator) {
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var newArr = Array.prototype.slice.call(array);
+
+    for (var i = 0; i < array.length; i++) {
+      var randomIndex = Math.floor(Math.random() * (i + 1));
+      var item = newArr[randomIndex];
+
+      newArr[randomIndex] = newArr[i];
+      newArr[i] = item;
+    }
+
+    return newArr;
   };
 
 
